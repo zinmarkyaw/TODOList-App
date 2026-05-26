@@ -18,6 +18,24 @@ data class TodoStats(
 
 class TodoViewModel(application: Application) : AndroidViewModel(application) {
     private val repository: TodoRepository
+    private val sharedPrefs = application.getSharedPreferences("todo_settings", android.content.Context.MODE_PRIVATE)
+
+    private val _selectedTheme = MutableStateFlow(getSavedTheme())
+    val selectedTheme = _selectedTheme.asStateFlow()
+
+    private fun getSavedTheme(): com.example.ui.theme.AppThemeOption {
+        val name = sharedPrefs.getString("app_theme", com.example.ui.theme.AppThemeOption.LAVENDER.name)
+        return try {
+            com.example.ui.theme.AppThemeOption.valueOf(name ?: com.example.ui.theme.AppThemeOption.LAVENDER.name)
+        } catch (e: Exception) {
+            com.example.ui.theme.AppThemeOption.LAVENDER
+        }
+    }
+
+    fun setSelectedTheme(theme: com.example.ui.theme.AppThemeOption) {
+        _selectedTheme.value = theme
+        sharedPrefs.edit().putString("app_theme", theme.name).apply()
+    }
 
     init {
         val database = AppDatabase.getDatabase(application)

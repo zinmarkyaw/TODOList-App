@@ -53,7 +53,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            MyApplicationTheme {
+            val currentTheme by viewModel.selectedTheme.collectAsStateWithLifecycle()
+            MyApplicationTheme(themeOption = currentTheme) {
                 TodoAppScreen(viewModel = viewModel)
             }
         }
@@ -144,6 +145,83 @@ fun TodoAppScreen(viewModel: TodoViewModel) {
                                 Icon(Icons.Default.Clear, contentDescription = null, modifier = Modifier.size(16.dp))
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text("Clear Done", style = MaterialTheme.typography.labelMedium)
+                            }
+                        }
+
+                        // Theme Switcher Button with Dropdown
+                        val selectedTheme by viewModel.selectedTheme.collectAsStateWithLifecycle()
+                        var themeMenuExpanded by remember { mutableStateOf(false) }
+
+                        Box {
+                            IconButton(
+                                onClick = { themeMenuExpanded = true },
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f))
+                                    .testTag("theme_switcher_button")
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Settings,
+                                    contentDescription = "Switch Theme",
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+
+                            DropdownMenu(
+                                expanded = themeMenuExpanded,
+                                onDismissRequest = { themeMenuExpanded = false },
+                                modifier = Modifier.background(MaterialTheme.colorScheme.surface)
+                            ) {
+                                Text(
+                                    text = "Select Palette",
+                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                                )
+                                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
+
+                                com.example.ui.theme.AppThemeOption.values().forEach { option ->
+                                    val isCurrent = selectedTheme == option
+                                    DropdownMenuItem(
+                                        text = {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                            ) {
+                                                // Tiny color dot preview
+                                                val dotColor = when (option) {
+                                                    com.example.ui.theme.AppThemeOption.LAVENDER -> Color(0xFF6750A4)
+                                                    com.example.ui.theme.AppThemeOption.SLATE -> Color(0xFF6550A4)
+                                                    com.example.ui.theme.AppThemeOption.FOREST -> Color(0xFF2E6C4C)
+                                                    com.example.ui.theme.AppThemeOption.COZY -> Color(0xFF855300)
+                                                }
+                                                Box(
+                                                    modifier = Modifier
+                                                        .size(12.dp)
+                                                        .clip(CircleShape)
+                                                        .background(dotColor)
+                                                )
+                                                Text(
+                                                    text = when (option) {
+                                                        com.example.ui.theme.AppThemeOption.LAVENDER -> "Lavender Minimal"
+                                                        com.example.ui.theme.AppThemeOption.SLATE -> "Slate Dark"
+                                                        com.example.ui.theme.AppThemeOption.FOREST -> "Forest Mint"
+                                                        com.example.ui.theme.AppThemeOption.COZY -> "Cozy Amber"
+                                                    },
+                                                    style = MaterialTheme.typography.labelLarge.copy(
+                                                        fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Normal
+                                                    )
+                                                )
+                                            }
+                                        },
+                                        onClick = {
+                                            viewModel.setSelectedTheme(option)
+                                            themeMenuExpanded = false
+                                        }
+                                    )
+                                }
                             }
                         }
 
