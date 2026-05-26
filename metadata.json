@@ -1,0 +1,6 @@
+{
+  "name": "Todo List",
+  "description": "An offline-first, highly responsive tasks and schedule manager built with Jetpack Compose and Room Database.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
